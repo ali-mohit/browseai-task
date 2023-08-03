@@ -7,7 +7,10 @@
     "test": "jest",
     "build": "tsc"
   },
-  "keywords": ["cli", "browseai"],
+  "keywords": [
+    "cli",
+    "browseai"
+  ],
   "author": "Ali Mohit",
   "license": "ISC",
   "devDependencies": {
@@ -15,5 +18,8 @@
     "jest": "^29.6.2",
     "ts-jest": "^29.1.1",
     "typescript": "^5.1.6"
+  },
+  "dependencies": {
+    "yargs": "13.2"
   }
 }
