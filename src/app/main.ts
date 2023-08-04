@@ -1,6 +1,10 @@
 import yargs from "yargs"
-import {version_command} from './commands/version'
-import {hello_world_command} from './commands/hello_world'
+
+import {BaseCliCommand} from './libs/base_cli_command'
+
+import {VersionCommand} from './commands/version'
+import {HelloWorldCommand} from './commands/hello_world'
+import {RobotListCommand} from './commands/robot_list'
 
 export function test_ctrl(name: string): number{
     console.log("Hello,", name)
@@ -9,12 +13,19 @@ export function test_ctrl(name: string): number{
 }
 
 function run_app(): number{
-
-    version_command(yargs)
-    hello_world_command(yargs)
     
-    yargs.argv
+    let func_list: BaseCliCommand[] = [
+        new VersionCommand(),
+        new HelloWorldCommand(),
+        new RobotListCommand(),
+    ]
+    
+    for(var cls_obj of func_list){
+        cls_obj.create_command(yargs);
+    }
 
+    yargs.argv
+    
     return 0;
 }
 

@@ -1,20 +1,24 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.hello_world_command = void 0;
-function hello_world_command(arg_obj) {
-    arg_obj.command("hello", "says hello world", {
-        name: {
-            alias: 'n',
-            describe: 'Your Name',
-            demandOption: false,
-            type: 'string'
-        }
-    }, (argv) => {
-        if (argv.name)
+exports.HelloWorldCommand = void 0;
+const base_cli_command_1 = require("../libs/base_cli_command");
+const command_option_1 = require("../libs/command_option");
+class HelloWorldCommand extends base_cli_command_1.BaseCliCommand {
+    constructor() {
+        super("hello", "says hello to world");
+    }
+    process_command(argv) {
+        if (argv.name) {
             console.log("Hello ", argv.name);
-        else
-            console.log("Hello, World");
-    });
+            return;
+        }
+        console.log("Hello, World");
+    }
+    get_option_list() {
+        return {
+            name: new command_option_1.CommandOption('name', 'n', 'string', 'Your Name', false, ""),
+        };
+    }
 }
-exports.hello_world_command = hello_world_command;
+exports.HelloWorldCommand = HelloWorldCommand;
 //# sourceMappingURL=hello_world.js.map
