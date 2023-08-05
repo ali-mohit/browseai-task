@@ -1,4 +1,4 @@
-import {Argv, ArgumentsCamelCase, Options} from 'yargs'
+import yargs, {Argv, ArgumentsCamelCase, Options} from 'yargs'
 
 import {CommandOption} from './command_option'
 
@@ -10,9 +10,9 @@ export abstract class BaseCliCommand{
     ){}
     
     abstract get_option_list():{[key: string]: CommandOption};
-    abstract process_command(argv: ArgumentsCamelCase): void;
+    public async process_command(_: ArgumentsCamelCase){};
     
-    public create_command(arg_obj: Argv<{}>): void{
+    public create_command(): void{
         let yargs_option_list: {[key: string]: Options} = {};
         let cmd_option_list = this.get_option_list();
 
@@ -21,12 +21,12 @@ export abstract class BaseCliCommand{
             yargs_option_list[key] = opt
         }
 
-        arg_obj.command(
+        yargs.command(
             this.name, 
             this.description, 
             yargs_option_list,
-            (argv) => {
-                this.process_command(argv)
+            async (argv) => {
+               await this.process_command(argv)
             }
         );
     }

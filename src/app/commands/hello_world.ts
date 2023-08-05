@@ -8,7 +8,7 @@ export class HelloWorldCommand extends BaseCliCommand {
         super("hello", "says hello to world")
     }
 
-    public process_command(argv: ArgumentsCamelCase): void {
+    public async process_command(argv: ArgumentsCamelCase) {
         if (argv.name){
             console.log("Hello ", argv.name);
             return;

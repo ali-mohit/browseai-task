@@ -12,7 +12,7 @@ export class VersionCommand extends BaseCliCommand{
         return {}
     }
 
-    process_command(_: ArgumentsCamelCase): void {
+    async process_command(_: ArgumentsCamelCase) {
         console.log("Browse AI CLI v1.0.0");
     }
 

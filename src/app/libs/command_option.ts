@@ -10,14 +10,24 @@ export class CommandOption{
         public describe: string = "",
         public demandOption: boolean=false,
         public defaultValue: any = "",
+        public showInActiveCli: boolean=true,
+        public choices: string[] | undefined = undefined,
     ){}
     
     public get_yargs_option(): Options {
-        return {
+        let result: Options = {
             alias: this.alias,
             describe: this.describe,
             demandOption: this.demandOption,
             type: this.type,
         };
+
+        if(this.choices)
+            result.choices = this.choices;
+
+        if(this.defaultValue)
+            result.default = this.defaultValue;
+
+        return result;
     }
 }

@@ -9,34 +9,38 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.RobotListCommand = void 0;
+exports.RobotInfoCommand = void 0;
 const base_cli_command_1 = require("../libs/base_cli_command");
 const command_option_1 = require("../libs/command_option");
 const robot_services_1 = require("../core/robot_services");
 const exception_1 = require("../core/exception");
-class RobotListCommand extends base_cli_command_1.BaseCliCommand {
+class RobotInfoCommand extends base_cli_command_1.BaseCliCommand {
     constructor(app_config) {
-        super("robot_list", "retrieve a list of your robots by api key");
+        super("robot_info", "retrieve information of a robot by api key and robot id");
         this.app_config = app_config;
     }
     get_option_list() {
         return {
             api_key: new command_option_1.CommandOption('api_key', 'a', 'string', 'BrowseAI API KEY', true, ""),
+            robot_id: new command_option_1.CommandOption('id', 'i', 'string', 'ROBOT ID', true, ""),
         };
     }
     process_command(argv) {
         var _a, _b, _c, _d;
         return __awaiter(this, void 0, void 0, function* () {
-            console.log("Starting to Get Robot List");
-            const result = yield (0, robot_services_1.get_robot_list)(this.app_config.base_url, String(argv.api_key));
+            console.log("Starting to Get a Robot information");
+            const result = yield (0, robot_services_1.get_robot_detail)(this.app_config.base_url, String(argv.api_key), String(argv.robot_id));
             if (result[1]) {
                 let err_code = -1;
                 err_code = (_b = (_a = result[1].response) === null || _a === void 0 ? void 0 : _a.status) !== null && _b !== void 0 ? _b : -1;
                 throw new exception_1.AppException(err_code, (_d = (_c = result[1].response) === null || _c === void 0 ? void 0 : _c.statusText) !== null && _d !== void 0 ? _d : "", result[1]);
             }
-            (0, robot_services_1.print_robot_list)(result[0]);
+            if (result[0])
+                (0, robot_services_1.print_robot_info)(result[0]);
+            else
+                console.log('robot id not found!');
         });
     }
 }
-exports.RobotListCommand = RobotListCommand;
-//# sourceMappingURL=robot_list.js.map
+exports.RobotInfoCommand = RobotInfoCommand;
+//# sourceMappingURL=robot_info.js.map
