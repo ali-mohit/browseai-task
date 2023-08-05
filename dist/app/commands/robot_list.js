@@ -21,14 +21,30 @@ class RobotListCommand extends base_cli_command_1.BaseCliCommand {
     }
     get_option_list() {
         return {
-            api_key: new command_option_1.CommandOption('api_key', 'a', 'string', 'BrowseAI API KEY', true, ""),
+            api_key: new command_option_1.CommandOption('api_key', 'a', 'password', 'BrowseAI API KEY', true, ""),
         };
     }
     process_command(argv) {
-        var _a, _b, _c, _d;
         return __awaiter(this, void 0, void 0, function* () {
             console.log("Starting to Get Robot List");
-            const result = yield (0, robot_services_1.get_robot_list)(this.app_config.base_url, String(argv.api_key));
+            yield this.main_process(String(argv.api_key));
+        });
+    }
+    process_command_cli(_) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let cli_result = yield this.run_cli(this.build_cli_inputs());
+            if (cli_result[1])
+                throw cli_result[1];
+            else if (cli_result[0] == null) {
+                throw 'cli returned NULL value.';
+            }
+            yield this.main_process(cli_result[0].api_key);
+        });
+    }
+    main_process(api_key) {
+        var _a, _b, _c, _d;
+        return __awaiter(this, void 0, void 0, function* () {
+            const result = yield (0, robot_services_1.get_robot_list)(this.app_config.base_url, api_key);
             if (result[1]) {
                 let err_code = -1;
                 err_code = (_b = (_a = result[1].response) === null || _a === void 0 ? void 0 : _a.status) !== null && _b !== void 0 ? _b : -1;

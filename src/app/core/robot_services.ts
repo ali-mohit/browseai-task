@@ -48,7 +48,7 @@ export async function get_robot_detail(base_url: string, api_key:string, robot_i
     }
 }
 
-export async function robot_run(base_url: string, api_key:string, robot: Robot, robot_id: string, use_default_parameters: boolean, parameters_file_address: string) : Promise<[RobotTask | null, AppException | null]>{
+export async function robot_run_from_file(base_url: string, api_key:string, robot: Robot, robot_id: string, use_default_parameters: boolean, parameters_file_address: string) : Promise<[RobotTask | null, AppException | null]>{
     let inputParametersData = null;
     try{
         if(!use_default_parameters){
@@ -71,7 +71,27 @@ export async function robot_run(base_url: string, api_key:string, robot: Robot, 
         return [null, app_ex]
     }
 
+    return await robot_run(base_url, api_key, robot, robot_id, use_default_parameters, inputParametersData, false);
+}
+
+export async function robot_run(base_url: string, api_key:string, robot: Robot, robot_id: string, use_default_parameters: boolean, inputParametersData: {} | null, need_validate_params: boolean = true) : Promise<[RobotTask | null, AppException | null]>{
     try{
+        if(use_default_parameters){
+            inputParametersData = null;
+        } else {
+            if(need_validate_params && inputParametersData){
+
+                let validate_result = validate_input_parameters(robot, inputParametersData);
+
+                if(validate_result[1] != null) {
+                    let exp = new AppException(400, "validation of input parameters was failed: " + validate_result[1].message, validate_result[1]);
+                    throw exp;
+                }
+
+                inputParametersData = validate_result[0];
+            }
+        }
+
         const url = base_url + "/v2/robots/" + robot_id + "/tasks"
 
         let data = {
@@ -99,7 +119,7 @@ export async function robot_run(base_url: string, api_key:string, robot: Robot, 
     }
 }
 
-export function validate_input_parameters(robot: Robot, inputData: object): [{} | null, AppException | null] {
+export function validate_input_parameters(robot: Robot, inputData: object | {}): [{} | null, AppException | null] {
     try{
         if(robot == null){
             throw "ROBOT information not found!";

@@ -16,6 +16,11 @@ class HelloWorldCommand extends base_cli_command_1.BaseCliCommand {
     constructor() {
         super("hello", "says hello to world");
     }
+    get_option_list() {
+        return {
+            name: new command_option_1.CommandOption('name', 'n', 'string', 'Your Name', false, ""),
+        };
+    }
     process_command(argv) {
         return __awaiter(this, void 0, void 0, function* () {
             if (argv.name) {
@@ -25,10 +30,21 @@ class HelloWorldCommand extends base_cli_command_1.BaseCliCommand {
             console.log("Hello, World");
         });
     }
-    get_option_list() {
-        return {
-            name: new command_option_1.CommandOption('name', 'n', 'string', 'Your Name', false, ""),
-        };
+    process_command_cli(_) {
+        return __awaiter(this, void 0, void 0, function* () {
+            console.clear();
+            let result = yield this.run_cli(this.build_cli_inputs());
+            if (result[1])
+                throw result[1];
+            else if (result[0] == null) {
+                throw 'cli returned NULL value.';
+            }
+            if (result[0].name) {
+                console.log("Hello ", result[0].name);
+                return;
+            }
+            console.log("Hello, World");
+        });
     }
 }
 exports.HelloWorldCommand = HelloWorldCommand;

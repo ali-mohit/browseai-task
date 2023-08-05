@@ -1,18 +1,28 @@
 # browseai-task
 
-## For Testing
+# HOW TO RUN TASKS:
 
-- npm install jest --save-dev
-- npm install ts-jest --save-dev
-- npm install @types/jest --save-dev
+- example: node .\dist\app\main.js [command] [options]
 
-# TASKS:
+## TASK: cli (interactive cli)
 
-- example: node .\dist\app\main.js --help
+- example: node .\dist\app\main.js cli
+```
+? Please select your command index:
+  1) retrieve a list of your robots by api key (robot_list)
+  2) retrieve information of a robot by api key and robot id (robot_info)
+  3) run a task for specific robot by api key and robot id (robot_run)
+  4) says hello to world (hello)
+  5) returns version of applications (version)
+  6) help
+  7) clear screen
+  8) exit
+  Answer:
+```
 
 ## TASK: robot_list
 
-- example (getting list of robots): node .\dist\app\main.js robot_list -a f691b2b0-ff27-4a29-b2a6-6e4fc241005a:88038480-a927-45e2-b3a2-428312df9db0
+- example (getting list of robots): node .\dist\app\main.js robot_list -a [API KEY]
 
 ```
 main.js [command]
@@ -60,7 +70,7 @@ Options:
 
 ## TASK: robot_info
 
-- example (get a specefic robot info): node .\dist\app\main.js robot_info -a f691b2b0-ff27-4a29-b2a6-6e4fc241005a:88038480-a927-45e2-b3a2-428312df9db0 -i 85e6e3a2-67fd-42fb-96e6-67dea8943f94
+- example (get a specefic robot info): node .\dist\app\main.js robot_info -a [API KEY] -i 85e6e3a2-67fd-42fb-96e6-67dea8943f94
 
 ### RESULT
 ```
@@ -94,8 +104,8 @@ Options:
 
 ## TASK: robot_run
 
-- example (run with parameters): node .\dist\app\main.js robot_run -a f691b2b0-ff27-4a29-b2a6-6e4fc241005a:88038480-a927-45e2-b3a2-428312df9db0 -i 85e6e3a2-67fd-42fb-96e6-67dea8943f94 -d no -p ./temp.json
-- example (run in default): node .\dist\app\main.js robot_run -a f691b2b0-ff27-4a29-b2a6-6e4fc241005a:88038480-a927-45e2-b3a2-428312df9db0 -i 85e6e3a2-67fd-42fb-96e6-67dea8943f94 -d yes
+- example (run with parameters): node .\dist\app\main.js robot_run -a [API KEY] -i 85e6e3a2-67fd-42fb-96e6-67dea8943f94 -d no -p ./temp.json
+- example (run in default): node .\dist\app\main.js robot_run -a [API KEY] -i 85e6e3a2-67fd-42fb-96e6-67dea8943f94 -d yes
 
 ### RESULT
 ```
@@ -143,3 +153,10 @@ Options:
   --parameters, -p          address of task parameters as a json file (exmpale:
                             ./temp.js)                                  [string]
 ```
+
+## For Testing
+
+- npm install jest --save-dev
+- npm install ts-jest --save-dev
+- npm install @types/jest --save-dev
+- npm test

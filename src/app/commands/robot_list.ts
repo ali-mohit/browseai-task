@@ -17,7 +17,7 @@ export class RobotListCommand extends BaseCliCommand {
             api_key : new CommandOption(
                 'api_key',
                 'a',
-                'string',
+                'password',
                 'BrowseAI API KEY',
                 true,
                 "",
@@ -27,8 +27,24 @@ export class RobotListCommand extends BaseCliCommand {
 
     async process_command(argv: ArgumentsCamelCase) {
         console.log("Starting to Get Robot List")
-         
-        const result = await get_robot_list(this.app_config.base_url, String(argv.api_key));
+        
+        await this.main_process(String(argv.api_key));
+    }
+
+    public async process_command_cli(_: {[key: string]: any}) {        
+        let cli_result = await this.run_cli(this.build_cli_inputs());
+
+        if(cli_result[1])
+            throw cli_result[1];
+        else if(cli_result[0] == null) {
+            throw 'cli returned NULL value.';
+        }
+
+        await this.main_process(cli_result[0].api_key);
+    }
+
+    private async main_process(api_key: string){
+        const result = await get_robot_list(this.app_config.base_url, api_key);
 
         if(result[1]) {
             let err_code = -1;

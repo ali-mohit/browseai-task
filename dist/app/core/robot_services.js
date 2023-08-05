@@ -35,7 +35,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.print_robot_info = exports.print_robot_list = exports.validate_input_parameters = exports.robot_run = exports.get_robot_detail = exports.get_robot_list = void 0;
+exports.print_robot_info = exports.print_robot_list = exports.validate_input_parameters = exports.robot_run = exports.robot_run_from_file = exports.get_robot_detail = exports.get_robot_list = void 0;
 const fs = __importStar(require("fs"));
 const axios_1 = __importDefault(require("axios"));
 const exception_1 = require("./exception");
@@ -77,8 +77,7 @@ function get_robot_detail(base_url, api_key, robot_id) {
     });
 }
 exports.get_robot_detail = get_robot_detail;
-function robot_run(base_url, api_key, robot, robot_id, use_default_parameters, parameters_file_address) {
-    var _a, _b;
+function robot_run_from_file(base_url, api_key, robot, robot_id, use_default_parameters, parameters_file_address) {
     return __awaiter(this, void 0, void 0, function* () {
         let inputParametersData = null;
         try {
@@ -97,7 +96,27 @@ function robot_run(base_url, api_key, robot, robot_id, use_default_parameters, p
             let app_ex = new exception_1.AppException(400, String(error), null);
             return [null, app_ex];
         }
+        return yield robot_run(base_url, api_key, robot, robot_id, use_default_parameters, inputParametersData, false);
+    });
+}
+exports.robot_run_from_file = robot_run_from_file;
+function robot_run(base_url, api_key, robot, robot_id, use_default_parameters, inputParametersData, need_validate_params = true) {
+    var _a, _b;
+    return __awaiter(this, void 0, void 0, function* () {
         try {
+            if (use_default_parameters) {
+                inputParametersData = null;
+            }
+            else {
+                if (need_validate_params && inputParametersData) {
+                    let validate_result = validate_input_parameters(robot, inputParametersData);
+                    if (validate_result[1] != null) {
+                        let exp = new exception_1.AppException(400, "validation of input parameters was failed: " + validate_result[1].message, validate_result[1]);
+                        throw exp;
+                    }
+                    inputParametersData = validate_result[0];
+                }
+            }
             const url = base_url + "/v2/robots/" + robot_id + "/tasks";
             let data = {
                 recordVideo: false,

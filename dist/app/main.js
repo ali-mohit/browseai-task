@@ -20,6 +20,7 @@ const robot_list_1 = require("./commands/robot_list");
 const robot_info_1 = require("./commands/robot_info");
 const robot_run_1 = require("./commands/robot_run");
 const cmd_config_1 = require("./app_configuration/cmd_config");
+const cli_1 = require("./commands/cli");
 function test_ctrl(name) {
     console.log("Hello,", name);
     return 0;
@@ -32,9 +33,11 @@ function run_app() {
             new robot_list_1.RobotListCommand(conf),
             new robot_info_1.RobotInfoCommand(conf),
             new robot_run_1.RobotRunCommand(conf),
-            new version_1.VersionCommand(),
             new hello_world_1.HelloWorldCommand(),
+            new version_1.VersionCommand(),
         ];
+        let cli = new cli_1.CliCommand(conf, func_list);
+        func_list.push(cli);
         for (var cls_obj of func_list) {
             cls_obj.create_command();
         }
