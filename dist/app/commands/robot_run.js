@@ -14,6 +14,7 @@ const base_cli_command_1 = require("../libs/base_cli_command");
 const command_option_1 = require("../libs/command_option");
 const robot_services_1 = require("../core/robot_services");
 const exception_1 = require("../core/exception");
+const input_params_util_1 = require("../libs/input_params_util");
 class RobotRunCommand extends base_cli_command_1.BaseCliCommand {
     constructor(app_config) {
         super("robot_run", "run a task for specific robot by api key and robot id");
@@ -21,18 +22,85 @@ class RobotRunCommand extends base_cli_command_1.BaseCliCommand {
     }
     get_option_list() {
         return {
-            api_key: new command_option_1.CommandOption('api_key', 'a', 'string', 'BrowseAI API KEY', true, ""),
-            robot_id: new command_option_1.CommandOption('id', 'i', 'string', 'ROBOT ID', true, ""),
-            default_parameters: new command_option_1.CommandOption('default', 'd', 'string', 'Making a new job by default parameters', true, "yes", true, ["yes", "no", "y", "n", "true", "false", "t", "f"]),
+            api_key: new command_option_1.CommandOption('api_key', 'a', 'password', 'BrowseAI API KEY', true, ""),
+            robot_id: new command_option_1.CommandOption('id', 'i', 'string', 'ROBOT ID', true, "", false),
+            default_parameters: new command_option_1.CommandOption('default', 'd', 'string', 'Making a new job by default parameters', true, "yes", false, ["yes", "no", "y", "n", "true", "false", "t", "f"]),
             parameters: new command_option_1.CommandOption('parameters_json_file_address', 'p', 'string', 'address of task parameters as a json file (exmpale: ./temp.js)', false, "", false),
         };
     }
     process_command(argv) {
-        var _a, _b, _c, _d, _e, _f;
+        var _a, _b;
         return __awaiter(this, void 0, void 0, function* () {
             console.log("Starting to run a task");
             let using_default_parameters = true;
-            const pod_result = yield (0, robot_services_1.get_robot_detail)(this.app_config.base_url, String(argv.api_key), String(argv.robot_id));
+            const robot = yield this.find_robot(String(argv.api_key), String(argv.robot_id));
+            let use_default = (_b = (_a = String(argv.default_parameters)) === null || _a === void 0 ? void 0 : _a.toLowerCase()) !== null && _b !== void 0 ? _b : "";
+            if (use_default && (use_default == "yes" || use_default == "y" || use_default == "true"))
+                using_default_parameters = true;
+            else
+                using_default_parameters = false;
+            const result = yield (0, robot_services_1.robot_run_from_file)(this.app_config.base_url, String(argv.api_key), robot, String(argv.robot_id), using_default_parameters, String(argv.parameters));
+            if (result[1]) {
+                throw result[1];
+            }
+            console.table(result[0]);
+        });
+    }
+    process_command_cli(_) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let cli_result = yield this.run_cli(this.build_cli_inputs());
+            if (cli_result[1])
+                throw cli_result[1];
+            else if (cli_result[0] == null) {
+                throw 'cli returned NULL value.';
+            }
+            const robot_list = yield (0, robot_services_1.get_robot_list)(this.app_config.base_url, cli_result[0].api_key);
+            if (robot_list[1])
+                throw robot_list[1];
+            let robot_choices = [];
+            for (let index in robot_list[0]) {
+                let robot_item = robot_list[0][index];
+                robot_choices.push(robot_item.name + " |[" + robot_item.id + "]");
+            }
+            let cli_questions_step_02 = [];
+            let expand = {
+                type: "list",
+                name: "id",
+                message: "Select the robot that you want to make a job",
+                choices: robot_choices,
+            };
+            cli_questions_step_02.push(expand);
+            cli_questions_step_02.push({
+                type: "confirm",
+                name: "making_by_default",
+                message: "Making a new job by default parameters",
+            });
+            let cli_result_step_02 = yield this.run_cli(cli_questions_step_02);
+            if (cli_result_step_02[1])
+                throw cli_result_step_02[1];
+            else if (cli_result_step_02[0] == null) {
+                throw 'cli returned NULL value. (step 02)';
+            }
+            let robot_id = cli_result_step_02[0].id.split('|')[1].replace("[", "").replace("]", "");
+            const robot = yield this.find_robot(cli_result[0].api_key, robot_id);
+            let parameters = {};
+            if (!cli_result_step_02[0].making_by_default) {
+                parameters = yield this.get_robot_parameters_by_cli(robot);
+            }
+            else {
+                parameters = null;
+            }
+            const result = yield (0, robot_services_1.robot_run)(this.app_config.base_url, cli_result[0].api_key, robot, robot_id, cli_result_step_02[0].making_by_default, parameters, true);
+            if (result[1]) {
+                throw result[1];
+            }
+            console.table(result[0]);
+        });
+    }
+    find_robot(api_key, robot_id) {
+        var _a, _b, _c, _d;
+        return __awaiter(this, void 0, void 0, function* () {
+            const pod_result = yield (0, robot_services_1.get_robot_detail)(this.app_config.base_url, api_key, robot_id);
             if (pod_result[1]) {
                 let err_code = -1;
                 err_code = (_b = (_a = pod_result[1].response) === null || _a === void 0 ? void 0 : _a.status) !== null && _b !== void 0 ? _b : -1;
@@ -40,16 +108,26 @@ class RobotRunCommand extends base_cli_command_1.BaseCliCommand {
             }
             if (!pod_result[0])
                 throw new exception_1.AppException(-1, "robot id not found", null);
-            let use_default = (_f = (_e = String(argv.default_parameters)) === null || _e === void 0 ? void 0 : _e.toLowerCase()) !== null && _f !== void 0 ? _f : "";
-            if (use_default && (use_default == "yes" || use_default == "y" || use_default == "true"))
-                using_default_parameters = true;
-            else
-                using_default_parameters = false;
-            const result = yield (0, robot_services_1.robot_run)(this.app_config.base_url, String(argv.api_key), pod_result[0], String(argv.robot_id), using_default_parameters, String(argv.parameters));
-            if (result[1]) {
-                throw result[1];
+            return pod_result[0];
+        });
+    }
+    get_robot_parameters_by_cli(robot) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!robot.inputParameters || robot.inputParameters.length == 0) {
+                return {};
             }
-            console.table(result[0]);
+            let cli_questions = [];
+            for (let param_index in robot.inputParameters) {
+                let question = (0, input_params_util_1.build_cli_question_by_input_parameters)(robot.inputParameters[param_index]);
+                cli_questions.push(question);
+            }
+            let cli_result = yield this.run_cli(cli_questions);
+            if (cli_result[1])
+                throw cli_result[1];
+            else if (cli_result[0] == null) {
+                throw 'cli returned NULL value. (get_parameters_by_cli)';
+            }
+            return cli_result[0];
         });
     }
 }

@@ -14,13 +14,19 @@ const base_cli_command_1 = require("../libs/base_cli_command");
 class VersionCommand extends base_cli_command_1.BaseCliCommand {
     constructor() {
         super("version", "returns version of applications");
+        this.app_version = "Browse AI CLI v1.0.0";
     }
     get_option_list() {
         return {};
     }
     process_command(_) {
         return __awaiter(this, void 0, void 0, function* () {
-            console.log("Browse AI CLI v1.0.0");
+            console.log(this.app_version);
+        });
+    }
+    process_command_cli(_) {
+        return __awaiter(this, void 0, void 0, function* () {
+            console.log(this.app_version);
         });
     }
 }
